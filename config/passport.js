@@ -29,28 +29,16 @@ const googleLogin = new GoogleStrategy(
       { expiresIn: "7d" }
     );
     try {
-      const oldUser = await User.findOneAndUpdate(
+      const user = await User.findOneAndUpdate(
         { email: profile.email },
-        { name: profile.displayName, avatar: profile.picture }
+        { name: profile.displayName, avatar: profile.picture },
+        { new: true, upsert: true }
       );
-      oldUser.token = token;
-      if (oldUser) {
-        return done(null, oldUser);
-      }
+      user.token = token;
+      return done(null, user);
     } catch (err) {
       console.log(err.message);
-    }
-
-    try {
-      const newUser = await new User({
-        email: profile.email,
-        name: profile.displayName,
-        avatar: profile.picture,
-      }).save();
-      newUser.token = token;
-      return done(null, newUser);
-    } catch (err) {
-      console.log(err.message);
+      return done(null, false);
     }
   }
 );

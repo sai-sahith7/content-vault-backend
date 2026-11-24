@@ -7,7 +7,7 @@ router.get("/me", async (req, res) => {
   try {
     res.json(req.user);
   } catch (error) {
-    res.json({ error: error.message });
+    res.status(500).json({ error: error.message });
   }
 });
 

@@ -12,12 +12,14 @@ router.get(
 router.get(
   "/google/callback",
   passport.authenticate("google", {
-    failureRedirect: "/",
+    failureRedirect: `${new URL("/?auth=failed", process.env.FRONTEND_URL)}`,
     session: false,
   }),
   (req, res) => {
     res.redirect(
-      `${process.env.FRONTEND_URL}googleToken?token=${req.user.token}`
+      `${new URL("/googleToken", process.env.FRONTEND_URL)}#token=${
+        req.user.token
+      }`
     );
   }
 );

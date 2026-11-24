@@ -22,13 +22,27 @@ const userAuthMiddleware = passport.authenticate("checkJWT", {
   session: false,
 });
 
+const optionalAuthMiddleware = (req, res, next) => {
+  passport.authenticate("checkJWT", { session: false }, (error, user) => {
+    req.user = user || null;
+    next();
+  })(req, res, next);
+};
+
+const publicReadMiddleware = (req, res, next) => {
+  if (req.method === "GET" && req.path !== "/") {
+    return optionalAuthMiddleware(req, res, next);
+  }
+  return userAuthMiddleware(req, res, next);
+};
+
 app.get("/", (req, res) => {
   res.send("API is up and running !!");
 });
 
 app.use("/user", userAuthMiddleware, userRouter);
-app.use("/collections", userAuthMiddleware, collectionsRouter);
-app.use("/items", userAuthMiddleware, itemRouter);
+app.use("/collections", publicReadMiddleware, collectionsRouter);
+app.use("/items", publicReadMiddleware, itemRouter);
 app.use("/auth", googleAuth);
 
 const PORT = process.env.PORT || 5000;
